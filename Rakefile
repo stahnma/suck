@@ -5,21 +5,18 @@ require 'active_record/fixtures'
 require 'erb'
 require 'yaml'
 
-ActiveRecord::Base.establish_connection(
-  :adapter  => 'mysql',
-  :database => 'newsuck',
-  :username => 'root',
-  :password => '',
-  :host     => 'localhost')
+#  @logger = Logger.new $stderr
+#  ActiveRecord::Base.logger = @logger
 
-  @logger = Logger.new $stderr
-  ActiveRecord::Base.logger = @logger
-  ActiveRecord::Migration.verbose = ENV["VERBOSE"] ? ENV["VERBOSE"] == "true" : true
-
+if ENV.has_key? 'db_env'
+  DB_ENV = ENV['db_env'] 
+else
+  DB_ENV = 'test'
+end
 
 namespace :db do
   desc "Migrate the database through scripts in db/migrate. Target specific version with VERSION=x"
-  task :migrate do
+  task :migrate =>  :environment  do
     ActiveRecord::Migrator.migrate('db/migrate', ENV["VERSION"] ? ENV["VERSION"].to_i : nil )
   end
 end
@@ -32,10 +29,14 @@ task :fixtures => :environment do
   end
 end
 
-
-
 task :environment do
- # ActiveRecord::Base.establish_connection(YAML::load(File.open('database.yml')))
- # ActiveRecord::Base.logger = Logger.new(File.open('database.log', 'a'))
+ ActiveRecord::Base.establish_connection(YAML::load(File.open('config/database.yml'))[DB_ENV])
+ ActiveRecord::Base.logger = Logger.new(File.open('logs/database.log', 'a'))
+ ActiveRecord::Migration.verbose = ENV["VERBOSE"] ? ENV["VERBOSE"] == "true" : true
 end
 
+
+desc "Retrieves the current schema version number"
+task :version => :environment do
+  puts "Current version: #{ActiveRecord::Migrator.current_version}"
+end
