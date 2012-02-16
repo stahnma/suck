@@ -35,6 +35,9 @@ task :environment do
  ActiveRecord::Migration.verbose = ENV["VERBOSE"] ? ENV["VERBOSE"] == "true" : true
 end
 
+desc "Migrate and install fixtures into a database"
+task :setup => [ "db:migrate", :fixtures ] do
+end
 
 desc "Retrieves the current schema version number"
 task :version => :environment do
