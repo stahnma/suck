@@ -2,6 +2,7 @@
 require 'rubygems'
 require 'active_record'
 
+require 'awesome_print'
 DB_ENV='test'
 
 ActiveRecord::Base.establish_connection(YAML::load(File.open('config/database.yml'))[DB_ENV])
@@ -13,10 +14,18 @@ ActiveRecord::Migration.verbose = ENV["VERBOSE"] ? ENV["VERBOSE"] == "true" : tr
 require 'app/model/suck_item'
 
 #a = SuckItem.find(:first)
-p SuckItem.find(:all, :conditions => {:name => "AIXX"})
-#p SuckItem.methods.sort
+SuckItem.find(:all, :conditions => {:name => "AIX"}).each do | item|
+  ap item
+  item.points = item.points - 1
+  item.save
+end
+
+
+#puts item.is_retired?
+#ap SuckItem.methods.sort
 #p a
 #p a.find_all(:fisrt)
+
 
 
 
